@@ -1,0 +1,327 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-style: normal;
+    transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  
+  :root {
+    --bg-color: #FFD5DC;
+    --text-color: #620607;
+    --header-bg: #B60062;
+    --main-bg: #BA4E6D;
+    --aside-bg: #8D8D51;
+    --section-bg: #FFD5DC;
+    --article-bg: #B60062;
+    --footer-bg: #620607;
+    --border-color: #620607;
+    --card-front-bg: #f0c7db;
+    --card-front-color: #620607;
+    --card-back-border: #620607;
+    --stat-bg: #B60062;
+    --stat-shadow: #8D8D51;
+    --btn-bg: #620607;
+    --btn-shadow: #BA4E6D;
+  }
+  
+  body {
+    background: var(--bg-color);
+    color: var(--text-color);
+  }
+  
+  .container {
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      "header header header"
+      "aside main section"
+      "aside main article"
+      "footer footer footer";
+  }
+  
+  header, main, aside, section, article, footer {
+    border-radius: 5px;
+  }
+  
+  header h1 {
+    font-size: 40px;
+  }
+  
+  main h2 {
+    font-size: 30px;
+  }
+  
+  section {
+    font-size: 25px;
+  }
+  
+  aside {
+    font-size: 25px;
+  }
+  
+  aside p {
+    font-size: 29px;
+  }
+  
+  footer h3 {
+    text-align: center;
+  }
+  
+  aside, article, footer {
+    color: white;
+  }
+  
+  header {
+    grid-area: header;
+    margin: 12px;
+    padding: 5px;
+    width: 920px;
+    background: var(--header-bg);
+    border: 2px solid var(--border-color);
+    text-align: center;
+    color: var(--text-color);
+  }
+  
+  main {
+    grid-area: main;
+    margin: 12px;
+    padding: 25px;
+    width: 550px;
+    background: var(--main-bg);
+    border: 2px solid var(--border-color);
+  }
+  
+  aside {
+    grid-area: aside;
+    margin: 12px;
+    padding: 5px;
+    background: var(--aside-bg);
+    border: 2px solid var(--border-color);
+  }
+  
+  section {
+    grid-area: section;
+    margin: 12px;
+    padding: 5px;
+    background: var(--section-bg);
+    border: 2px solid var(--border-color);
+  }
+  
+  article {
+    grid-area: article;
+    margin: 12px;
+    padding-left: 20px;
+    background: var(--article-bg);
+    border: 2px solid var(--border-color); 
+    /*color: var(--text-color);*/
+  }
+  
+  footer {
+    grid-area: footer;
+    margin: 12px;
+    padding: 5px;
+    background: var(--footer-bg);
+    border: 2px solid var(--border-color);
+    color: white;
+  }
+  
+  /* ===== JOGO DA MEMÓRIA ===== */
+  .memory-game {
+    max-width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  
+  .memory-game .stats {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+  }
+  
+  .memory-game .stat {
+    color: #FFF;
+    padding: 8px 18px;
+    border-radius: 20px;
+    text-align: center;
+    min-width: 80px;
+    background-color: var(--stat-bg);
+    box-shadow: 0 5px 0 var(--stat-shadow);
+    border: 4px solid var(--text-color);
+  }
+  
+  .memory-game .stat-label {
+    font-size: 0.8em;
+    margin-bottom: 3px;
+  }
+  
+  .memory-game .stat-value {
+    font-size: 1em;
+    font-weight: bold;
+  }
+  
+  .memory-game .game-board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .memory-game .card {
+    background: transparent;
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+  }
+  
+  .memory-game .card:hover {
+    transform: scale(1.05);
+  }
+  
+  .memory-game .card.flipped {
+    transform: rotateY(180deg);
+  }
+  
+  .memory-game .card.flipped:hover {
+    transform: rotateY(180deg) scale(1.05);
+  }
+  
+  .memory-game .card.matched {
+    pointer-events: none;
+  }
+  
+  .memory-game .card-front,
+  .memory-game .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .memory-game .card-front {
+    font-size: 2.5em;
+    background: var(--card-front-bg);
+    color: var(--card-front-color);
+    border: 4px solid var(--border-color);
+    box-shadow: 0 4px 0 #FB91C0; /* mantive fixo para não quebrar o estilo */
+  }
+  
+  .memory-game .card-back {
+    background: #fff;
+    transform: rotateY(180deg);
+    overflow: hidden;
+    border: 4px solid var(--card-back-border);
+    box-shadow: 0 4px 0 #FB91C0;
+  }
+  
+  .memory-game .card-back img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .memory-game .controls {
+    text-align: center;
+  }
+  
+  .memory-game .btn {
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 10px 30px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--btn-bg);
+    box-shadow: 0 3px 0 var(--btn-shadow);
+    margin-top: 20px;
+  }
+  
+  .memory-game .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #ff9cc9;
+  }
+  
+  .memory-game .btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 3px 0 #fb91c0;
+  }
+  
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(238, 13, 137);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  
+  .modal.show {
+    display: flex;
+  }
+  
+  .modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 0 10px 0 #ff84c6;
+    border: 6px solid #FF6B9D;
+    animation: bounce 0.5s;
+    max-width: 90%;
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  
+  .modal-content h2 {
+    color: #FF6B9D;
+    font-size: 2.2em;
+    margin-bottom: 15px;
+  }
+  
+  .modal-content p {
+    color: #c41a96;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  
+  /* Botão de tema */
+  .theme-btn {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(4px);
+    border: 2px solid darkcyan;
+    color: darkcyan;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.3s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+  
+  .theme-btn:hover {
+    transform: scale(1.1);
+  }

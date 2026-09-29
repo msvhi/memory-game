@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Jogo da Memória</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <header>
+    <h1>Jogo da Memória</h1>
+  </header>
+
+  <div class="container">
+    <main>
+      <h2>Que tal dar uma olhada em nosso jogo?</h2>
+
+      <!-- Jogo da Memória -->
+      <div class="memory-game">
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Moves</div>
+            <div class="stat-value" id="moves">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Time</div>
+            <div class="stat-value" id="time">0:00</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Matches</div>
+            <div class="stat-value" id="matches">0/10</div>
+          </div>
+        </div>
+
+        <div class="game-board" id="gameBoard"></div>
+
+        <div class="controls">
+          <button class="btn" onclick="newGame()">
+            <i class="fas fa-redo"></i> Novo jogo
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <aside>
+      <h2>Sobre:</h2>
+      <p>1.Nosso grupo pensou na possibilidade de incluir pessoas com deficiência auditiva. Adicionando formatos, cores e figuras nas peças do nosso jogo, tudo para incluir e facilitar a vida deles de alguma forma.<br><br>2.O objetivo principal é que essas pessoas se sintam acolhidas e parte da sociedade, o que dificilmente vemos pois o mundo sempre quer excluir e realizar descriminalização com deficientes auditivos.</p>
+    </aside>
+
+    <section>
+      <p>No projeto de jogo da memória, o jogador precisa virar as peças aleatórias e encontrar as imagens correspondentes com as palavras em libras. Este nome foi escolhido para lembrar e ensinar a importância da Língua de Sinais na vida de pessoas surdas e pessoas que convivem com elas no Brasil, além da longa história de sua existência no país, remetendo ao período do Segundo Império e sendo oficializada como meio legal de comunicação em 2002.</p>
+    </section>
+
+    <article>
+      <h3>💡DICAS:</h3>
+      <ul>
+        <li>Memorize a posição das cartas.</li>
+        <li>Foque e mantenha a calma.</li>
+        <li>A prática leva á melhoria!</li>
+      </ul>
+    </article>
+
+    <footer>
+      <h3>Este projeto foi desenvolvido por @msvhi!</h3>
+    </footer>
+  </div>
+
+  <!-- Modal (agora antes do script) -->
+  <div class="modal" id="winModal">
+    <div class="modal-content">
+      <h2><i class="fas fa-trophy"></i> Você ganhou! <i class="fas fa-trophy"></i></h2>
+      <p>Moves: <span id="finalMoves"></span><br>Time: <span id="finalTime"></span></p>
+      <button class="btn" onclick="newGame()">Jogar novamente</button>
+    </div>
+  </div>
+
+  <!-- Botão de tema (também antes do script) -->
+  <button id="themeToggle" class="theme-btn" title="Trocar tema">
+    <i class="fas fa-palette"></i>
+  </button>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script>
+    // 1. Jogo da memória
+    var images = [
+      "images/img1.png",
+      "images/img2.png",
+      "images/img3.png",
+      "images/img4.png",
+      "images/img5.png",
+      "images/img6.png",
+      "images/img7.png",
+      "images/img8.png",
+      "images/img9.png",
+      "images/img10.png"
+    ];
+
+    var firstCard = null;
+    var secondCard = null;
+    var canFlip = true;
+    var matches = 0;
+    var moves = 0;
+    var seconds = 0;
+    var timerRunning = false;
+    var timerInterval;
+
+    function startGame() {
+      var gameBoard = document.getElementById("gameBoard");
+      gameBoard.innerHTML = "";
+
+      var cardImages = images.concat(images);
+      cardImages.sort(function () {
+        return Math.random() - 0.5;
+      });
+
+      for (var i = 0; i < cardImages.length; i++) {
+        var card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML =
+          '<div class="card-front"><i class="fas fa-heart"></i></div>' +
+          '<div class="card-back"><img src="' + cardImages[i] + '"></div>';
+        card.onclick = flipCard;
+        card.dataset.image = cardImages[i];
+        gameBoard.appendChild(card);
+      }
+
+      firstCard = null;
+      secondCard = null;
+      canFlip = true;
+      matches = 0;
+      moves = 0;
+      seconds = 0;
+      timerRunning = false;
+
+      updateStats();
+      clearInterval(timerInterval);
+    }
+
+    function flipCard() {
+      if (!canFlip) return;
+      if (this.classList.contains("flipped")) return;
+      if (this.classList.contains("matched")) return;
+
+      if (!timerRunning) {
+        startTimer();
+      }
+
+      this.classList.add("flipped");
+
+      if (firstCard == null) {
+        firstCard = this;
+      } else {
+        secondCard = this;
+        canFlip = false;
+        moves++;
+        updateStats();
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      var match = firstCard.dataset.image == secondCard.dataset.image;
+
+      if (match) {
+        setTimeout(function () {
+          firstCard.classList.add("matched");
+          secondCard.classList.add("matched");
+          matches++;
+          updateStats();
+          resetCards();
+
+          if (matches == 10) {
+            endGame();
+          }
+        }, 500);
+      } else {
+        setTimeout(function () {
+          firstCard.classList.remove("flipped");
+          secondCard.classList.remove("flipped");
+          resetCards();
+        }, 1000);
+      }
+    }
+
+    function resetCards() {
+      firstCard = null;
+      secondCard = null;
+      canFlip = true;
+    }
+
+    function startTimer() {
+      timerRunning = true;
+      timerInterval = setInterval(function () {
+        seconds++;
+        updateStats();
+      }, 1000);
+    }
+
+    function updateStats() {
+      document.getElementById("moves").textContent = moves;
+      document.getElementById("matches").textContent = matches + "/10";
+
+      var mins = Math.floor(seconds / 60);
+      var secs = seconds % 60;
+      if (secs < 10) secs = "0" + secs;
+      document.getElementById("time").textContent = mins + ":" + secs;
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      document.getElementById("finalMoves").textContent = moves;
+      document.getElementById("finalTime").textContent =
+        document.getElementById("time").textContent;
+      document.getElementById("winModal").classList.add("show");
+    }
+
+    function newGame() {
+      document.getElementById("winModal").classList.remove("show");
+      clearInterval(timerInterval);
+      startGame();
+    }
+
+    startGame();
+
+    // 2. Sistema de temas (com 9 paletas)
+    const themes = [
+      { // 1 – Sangue
+        '--bg-color': '#FFD5DC',
+        '--text-color': '#620607',
+        '--header-bg': '#B60062',
+        '--main-bg': '#BA4E6D',
+        '--aside-bg': '#8D8D51',
+        '--section-bg': '#FFD5DC',
+        '--article-bg': '#B60062',
+        '--footer-bg': '#620607',
+        '--border-color': '#620607',
+        '--card-front-bg': '#f0c7db',
+        '--card-front-color': '#620607',
+        '--card-back-border': '#620607',
+        '--stat-bg': '#B60062',
+        '--stat-shadow': '#8D8D51',
+        '--btn-bg': '#620607',
+        '--btn-shadow': '#BA4E6D'
+      },
+      { // 2 – Azuis
+        '--bg-color': '#AED5F5',
+        '--text-color': '#394988',
+        '--header-bg': '#367ADF',
+        '--main-bg': '#4FACE5',
+        '--aside-bg': '#353A4C',
+        '--section-bg': '#AED5F5',
+        '--article-bg': '#367ADF',
+        '--footer-bg': '#394988',
+        '--border-color': '#394988',
+        '--card-front-bg': '#d4e6f7',
+        '--card-front-color': '#367ADF',
+        '--card-back-border': '#367ADF',
+        '--stat-bg': '#367ADF',
+        '--stat-shadow': '#4FACE5',
+        '--btn-bg': '#394988',
+        '--btn-shadow': '#4FACE5'
+      },
+      { // 3 – Verde-água
+        '--bg-color': '#D9F5F0',
+        '--text-color': '#024D60',
+        '--header-bg': '#1C4EA7',
+        '--main-bg': '#2CACAD',
+        '--aside-bg': '#024D60',
+        '--section-bg': '#75E2E0',
+        '--article-bg': '#1C4EA7',
+        '--footer-bg': '#024D60',
+        '--border-color': '#024D60',
+        '--card-front-bg': '#b8e6e5',
+        '--card-front-color': '#024D60',
+        '--card-back-border': '#1C4EA7',
+        '--stat-bg': '#1C4EA7',
+        '--stat-shadow': '#2CACAD',
+        '--btn-bg': '#024D60',
+        '--btn-shadow': '#2CACAD'
+      },
+      { // 4 – Amarelo-claro
+        '--bg-color': '#FFF7D6',
+        '--text-color': '#7FA8D6',
+        '--header-bg': '#FFE08A',
+        '--main-bg': '#FFF2B2',
+        '--aside-bg': '#A8C6E7',
+        '--section-bg': '#FFE08A',
+        '--article-bg': '#FFE08A',
+        '--footer-bg': '#7FA8D6',
+        '--border-color': '#7FA8D6',
+        '--card-front-bg': '#fef7d6',
+        '--card-front-color': '#7FA8D6',
+        '--card-back-border': '#A8C6E7',
+        '--stat-bg': '#A8C6E7',
+        '--stat-shadow': '#FFE08A',
+        '--btn-bg': '#7FA8D6',
+        '--btn-shadow': '#FFF2B2'
+      },
+      { // 5 – Terrosos
+        '--bg-color': '#F2F5E2',
+        '--text-color': '#290024',
+        '--header-bg': '#D4954D',
+        '--main-bg': '#E3DEA4',
+        '--aside-bg': '#775533',
+        '--section-bg': '#D4954D',
+        '--article-bg': '#E3DEA4',
+        '--footer-bg': '#290024',
+        '--border-color': '#290024',
+        '--card-front-bg': '#f0edd6',
+        '--card-front-color': '#775533',
+        '--card-back-border': '#775533',
+        '--stat-bg': '#D4954D',
+        '--stat-shadow': '#775533',
+        '--btn-bg': '#290024',
+        '--btn-shadow': '#D4954D'
+      },
+      { // 6 – Vermelhos
+        '--bg-color': '#FFCAD0',
+        '--text-color': '#250202',
+        '--header-bg': '#F10222',
+        '--main-bg': '#892325',
+        '--aside-bg': '#250202',
+        '--section-bg': '#FFCAD0',
+        '--article-bg': '#F10222',
+        '--footer-bg': '#250202',
+        '--border-color': '#250202',
+        '--card-front-bg': '#fcd9dc',
+        '--card-front-color': '#F10222',
+        '--card-back-border': '#892325',
+        '--stat-bg': '#F10222',
+        '--stat-shadow': '#892325',
+        '--btn-bg': '#250202',
+        '--btn-shadow': '#F10222'
+      },
+      { // 7 – Dourados
+        '--bg-color': '#FBF5D2',
+        '--text-color': '#441004',
+        '--header-bg': '#EFBB55',
+        '--main-bg': '#AD6D15',
+        '--aside-bg': '#79380B',
+        '--section-bg': '#FEE39F',
+        '--article-bg': '#EFBB55',
+        '--footer-bg': '#441004',
+        '--border-color': '#441004',
+        '--card-front-bg': '#f8f0d4',
+        '--card-front-color': '#AD6D15',
+        '--card-back-border': '#79380B',
+        '--stat-bg': '#EFBB55',
+        '--stat-shadow': '#AD6D15',
+        '--btn-bg': '#441004',
+        '--btn-shadow': '#EFBB55'
+      },
+      { // 8 – Marrons
+        '--bg-color': '#F2CF2A',
+        '--text-color': '#443025',
+        '--header-bg': '#AA7F66',
+        '--main-bg': '#7F5836',
+        '--aside-bg': '#443025',
+        '--section-bg': '#EC9C9D',
+        '--article-bg': '#AA7F66',
+        '--footer-bg': '#443025',
+        '--border-color': '#443025',
+        '--card-front-bg': '#f5e0b0',
+        '--card-front-color': '#7F5836',
+        '--card-back-border': '#AA7F66',
+        '--stat-bg': '#AA7F66',
+        '--stat-shadow': '#7F5836',
+        '--btn-bg': '#443025',
+        '--btn-shadow': '#AA7F66'
+      },
+      { // 9 – Cinza-roxo
+        '--bg-color': '#F0D9E4',
+        '--text-color': '#16131F',
+        '--header-bg': '#4A3F4B',
+        '--main-bg': '#C1A0AC',
+        '--aside-bg': '#806C79',
+        '--section-bg': '#F0D9E4',
+        '--article-bg': '#4A3F4B',
+        '--footer-bg': '#16131F',
+        '--border-color': '#16131F',
+        '--card-front-bg': '#e6d3db',
+        '--card-front-color': '#4A3F4B',
+        '--card-back-border': '#806C79',
+        '--stat-bg': '#4A3F4B',
+        '--stat-shadow': '#C1A0AC',
+        '--btn-bg': '#16131F',
+        '--btn-shadow': '#4A3F4B'
+      }
+    ];
+
+    let currentTheme = 0;
+
+    // Agora o botão existe no DOM, podemos atribuir o evento
+    document.getElementById('themeToggle').addEventListener('click', function() {
+      currentTheme = (currentTheme + 1) % themes.length;
+      const theme = themes[currentTheme];
+      const root = document.documentElement;
+
+      for (let key in theme) {
+        root.style.setProperty(key, theme[key]);
+      }
+    });
+  </script>
+</body>
+</html>
